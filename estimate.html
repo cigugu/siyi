@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>肆意的委託小工具</title>
+  <style>
+    :root{
+      --bg:#f8f5f2;--card:#fffdfb;--text:#2b211f;--muted:#766b66;
+      --primary:#8f3f2f;--primary-dark:#6f2f25;--accent:#c88f7a;
+      --border:#e4d8d2;--soft:#fbf0eb;--warn-bg:#fff1e8;--warn:#ad452f;
+      --bad-bg:#fdebea;--bad:#912a22;--good-bg:#f0f5ef;--good:#536b4d;
+      --shadow:0 18px 48px rgba(43,33,31,.09);--radius:20px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;color:var(--text);background:radial-gradient(circle at top left,rgba(200,143,122,.18),transparent 28rem),var(--bg);line-height:1.68}
+    main{max-width:1080px;margin:0 auto;padding:28px 16px 60px}
+    h1{margin:0 0 8px;font-size:clamp(2rem,8vw,3.55rem);line-height:1.12;color:var(--primary-dark);letter-spacing:.04em}
+    .subtitle{margin:0;color:var(--muted);max-width:720px}
+    .tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:22px 0 16px}
+    .tab{border:1px solid var(--border);background:rgba(255,255,255,.78);color:var(--primary-dark);border-radius:999px;padding:12px 14px;font-weight:900;cursor:pointer}
+    .tab.active{background:var(--primary);color:white;border-color:var(--primary);box-shadow:0 10px 24px rgba(143,63,47,.18)}
+    .grid{display:grid;gap:16px}
+    .card{background:rgba(255,253,251,.94);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+    .card h2{margin:0 0 12px;color:var(--primary-dark);font-size:1.24rem}
+    .note{margin:-4px 0 14px;color:var(--muted);font-size:.93rem}
+    label{display:block;font-weight:800;margin:14px 0 7px}
+    input,select,textarea{width:100%;border:1px solid var(--border);border-radius:14px;background:#fff;color:var(--text);padding:12px 13px;font:inherit;outline:none}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(200,143,122,.18)}
+    .row{display:grid;gap:12px}.hidden{display:none!important}
+    .radioRow,.checkRow{display:grid;gap:10px;margin-top:8px}
+    .radioCard,.checkCard{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border);border-radius:16px;background:#fff;padding:12px;cursor:pointer}
+    .radioCard input,.checkCard input{width:auto;margin-top:6px;accent-color:var(--primary)}
+    .hint{display:block;color:var(--muted);font-weight:500;font-size:.88rem}
+    .result{display:grid;gap:12px}
+    .priceBox{border:1px solid rgba(143,63,47,.18);border-radius:20px;padding:18px;background:linear-gradient(135deg,rgba(143,63,47,.10),rgba(200,143,122,.13))}
+    .priceLabel{color:var(--muted);font-size:.92rem;font-weight:800}
+    .price{font-size:clamp(1.85rem,8vw,3rem);font-weight:950;color:var(--primary-dark);line-height:1.15;margin-top:2px}
+    .pills{display:flex;flex-wrap:wrap;gap:6px}
+    .pill{display:inline-flex;border-radius:999px;padding:6px 10px;font-size:.86rem;font-weight:900;background:var(--warn-bg);color:var(--warn)}
+    .pill.good{background:var(--good-bg);color:var(--good)}.pill.bad{background:var(--bad-bg);color:var(--bad)}
+    .breakdown{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff}
+    .line{display:flex;justify-content:space-between;gap:14px;padding:10px 12px;border-bottom:1px solid var(--border)}
+    .line:last-child{border-bottom:0}.line span:last-child{text-align:right;font-weight:900}
+    .notice{border:1px solid rgba(173,69,47,.20);border-radius:16px;background:var(--warn-bg);color:var(--warn);padding:12px;font-weight:800}
+    .notice.bad{background:var(--bad-bg);color:var(--bad)}
+    .buttonRow{display:grid;gap:10px;margin-top:12px}
+    button{border:0;border-radius:15px;padding:13px 16px;font:inherit;font-weight:950;cursor:pointer;color:white;background:var(--primary)}
+    button:hover{background:var(--primary-dark)}
+    button.secondary{background:white;color:var(--primary-dark);border:1px solid var(--border)}
+    button.secondary:hover{background:var(--soft)}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    .copyStatus{min-height:1.4em;color:var(--good);font-weight:900;font-size:.93rem}
+    .reviewList{display:grid;gap:10px;margin-top:12px}
+    .reviewItem{border:1px solid var(--border);border-radius:16px;background:#fff;padding:12px;display:grid;gap:8px}
+    .reviewTop{display:flex;justify-content:space-between;gap:10px}
+    .reviewTitle{font-weight:950;color:var(--primary-dark)}
+    .smallBtn{padding:8px 10px;border-radius:12px;font-size:.88rem;background:#fff;color:var(--bad);border:1px solid var(--border)}
+    .footer{margin:18px 4px 0;color:var(--muted);font-size:.9rem}
+    @media (min-width:820px){main{padding:44px 24px 72px}.grid{grid-template-columns:1fr 1fr;align-items:start}.card{padding:24px}.row.two{grid-template-columns:1fr 1fr}.buttonRow{grid-template-columns:1fr 1fr}.tabs{max-width:520px}}
+  </style>
+</head>
+<body>
+<main>
+  <section>
+    <h1>肆意的委託小工具</h1>
+    <p class="subtitle">用來初步估算價格與時長。所有結果僅供參考，實際報價、交期與是否可接仍需確認。</p>
+  </section>
+
+  <div class="tabs">
+    <button class="tab active" id="writingTab" type="button">文稿類估價</button>
+    <button class="tab" id="reviewTab" type="button">鑑定類估價</button>
+  </div>
+
+  <section id="writingPanel" class="grid">
+    <form class="card">
+      <h2>文稿類條件</h2>
+      <p class="note">一般委託與驚喜包都採加法制：所有百分比加價都以原價計算。</p>
+
+      <label for="writingType">文稿類型</label>
+      <select id="writingType">
+        <option value="general">一般委託</option>
+        <option value="surprise">驚喜包</option>
+      </select>
+
+      <div id="generalFields">
+        <div class="row two">
+          <div><label for="rating">內容分級</label><select id="rating"><option>清水</option><option>R-18</option><option>R-18G</option></select></div>
+          <div><label for="generalWords">預計字數</label><input id="generalWords" type="number" min="1" value="1000"></div>
+        </div>
+        <label for="generalRush">件別</label>
+        <select id="generalRush"><option>普通件</option><option>急件</option><option>超急件</option></select>
+        <label>特殊需求</label>
+        <div class="checkRow">
+          <label class="checkCard"><input id="worldbuilding" type="checkbox"><span>世界觀理解<span class="hint">價格 +10%～+50%，時長 +1～3 天；若與高複雜度劇情同選，時長 +1～5 天。</span></span></label>
+          <label class="checkCard"><input id="complexPlot" type="checkbox"><span>高複雜度劇情<span class="hint">價格 +10%～+40%，時長 +1～3 天；若與世界觀理解同選，時長 +1～5 天。</span></span></label>
+        </div>
+      </div>
+
+      <div id="surpriseFields" class="hidden">
+        <label for="surpriseWords">驚喜包字數</label>
+        <select id="surpriseWords">
+          <option value="500">500 字｜180 元</option><option value="800">800 字｜300 元</option><option value="1200">1200 字｜450 元</option>
+          <option value="1600">1600 字｜600 元</option><option value="4000">4000 字｜1400 元</option><option value="5000">5000 字｜1700 元</option>
+        </select>
+        <label for="surpriseRush">件別</label>
+        <select id="surpriseRush"><option>普通件</option><option>急件</option><option>超急件</option></select>
+        <label for="surpriseAdult">成人向設定</label>
+        <select id="surpriseAdult">
+          <option>非成人向</option><option>保底至少一篇成人向內容</option><option>保底至少一篇純 G 向內容</option><option>全數內容皆為成人向</option><option>全數內容皆為純 G 向</option>
+        </select>
+      </div>
+
+      <label>未成年相關確認</label>
+      <div class="radioRow">
+        <label class="radioCard"><input type="radio" name="writingMinor" value="no" checked><span>不含未成年角色 / 未成年相關設定</span></label>
+        <label class="radioCard"><input type="radio" name="writingMinor" value="yes"><span>含未成年角色 / 未成年相關設定<span class="hint">未成年相關一律不接 R/G 向成人內容。</span></span></label>
+      </div>
+    </form>
+
+    <section class="card">
+      <h2>文稿類結果</h2>
+      <div class="result" id="writingResult"></div>
+      <div class="buttonRow"><button id="copyWriting" type="button">複製估價與時長</button></div>
+      <p class="copyStatus" id="writingStatus"></p>
+    </section>
+  </section>
+
+  <section id="reviewPanel" class="grid hidden">
+    <form class="card">
+      <h2>加入鑑定項目</h2>
+      <p class="note">鑑定字數只能選固定字數。多個鑑定會先看總字數，再依普通件 / 超急件參考一般委託時長。</p>
+
+      <label for="reviewType">鑑定類型</label>
+      <select id="reviewType"><option value="normal">一般鑑定</option><option value="special">特殊鑑定</option></select>
+
+      <div id="normalReviewFields">
+        <label for="reviewTopic">主題</label>
+        <select id="reviewTopic"><option>尾巴</option><option>職業</option><option>飲品</option><option>香氛</option><option>食物</option><option>死亡</option><option>生命</option><option>幾把</option><option>性癖</option><option>其他</option></select>
+
+        <label for="reviewWords">鑑定字數</label>
+        <select id="reviewWords">
+          <option value="50">50 字｜15 元</option><option value="100">100 字｜30 元</option><option value="150">150 字｜45 元</option><option value="300" selected>300 字｜90 元</option><option value="500">500 字｜170 元</option>
+          <option value="800">800 字｜270 元</option><option value="1000">1000 字｜340 元</option><option value="1200">1200 字｜380 元</option><option value="1600">1600 字｜510 元</option><option value="2000">2000 字｜640 元</option>
+        </select>
+
+        <label for="reviewAdult">R/G 向內容</label>
+        <select id="reviewAdult">
+          <option>非 R/G 向</option><option>加 R/G 向內容</option><option>保底至少一篇成人向內容</option><option>保底至少一篇純 G 向內容</option><option>全數內容皆為成人向</option><option>全數內容皆為純 G 向</option>
+        </select>
+      </div>
+
+      <div id="specialReviewFields" class="hidden">
+        <label for="specialTopic">特殊鑑定主題</label>
+        <select id="specialTopic"><option>coc調查員鑑</option><option>哈利波特paro鑑</option><option>漫宿鑑</option><option>都市鑑</option><option>夢鏡鑑</option><option>玫瑰賭場鑑</option><option>其他</option></select>
+        <p class="note">特殊鑑定目前默認 1200 字，400 元起跳，需人工確認。</p>
+      </div>
+
+      <label for="reviewQty">數量</label>
+      <input id="reviewQty" type="number" min="1" value="1">
+
+      <label for="reviewRush">鑑定件別</label>
+      <select id="reviewRush"><option>普通件</option><option>超急件</option></select>
+
+      <label>未成年相關確認</label>
+      <div class="radioRow">
+        <label class="radioCard"><input type="radio" name="reviewMinor" value="no" checked><span>不含未成年角色 / 未成年相關設定</span></label>
+        <label class="radioCard"><input type="radio" name="reviewMinor" value="yes"><span>含未成年角色 / 未成年相關設定<span class="hint">未成年相關一律不接 R/G 向成人內容。</span></span></label>
+      </div>
+
+      <div class="buttonRow">
+        <button id="addReview" type="button">加入鑑定清單</button>
+        <button id="clearReviews" class="secondary" type="button">清空清單</button>
+      </div>
+    </form>
+
+    <section class="card">
+      <h2>鑑定類結果</h2>
+      <div class="result" id="reviewResult"></div>
+      <div class="reviewList" id="reviewList"></div>
+      <div class="buttonRow"><button id="copyReview" type="button">複製估價與時長</button></div>
+      <p class="copyStatus" id="reviewStatus"></p>
+    </section>
+  </section>
+
+  <p class="footer">提醒：此工具只做估價與估時長。若選到人工確認項目，代表最後仍需要正式確認後才算成立。</p>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const generalRates={"清水":40,"R-18G":60,"R-18":70};
+const rushRates={"普通件":0,"急件":0.5,"超急件":1};
+const surprisePrices={500:180,800:300,1200:450,1600:600,4000:1400,5000:1700};
+const adultRates={"非成人向":0,"非 R/G 向":0,"加 R/G 向內容":0.2,"保底至少一篇成人向內容":0.2,"保底至少一篇純 G 向內容":0.1,"全數內容皆為成人向":0.4,"全數內容皆為純 G 向":0.2};
+const fixedReviewPrices={50:15,100:30,150:45,300:90,500:170};
+const fixedReviewRgFees={50:10,100:20,150:30,300:40,500:50};
+let reviews=[],writingCopy="",reviewCopy="";
+
+function money(n){const v=Number.isInteger(n)?n:Math.round(n*100)/100;return `NT$ ${v.toLocaleString("zh-TW")}`}
+function floorTen(n){return Math.floor(n/10)*10}
+function roundWords(n){return Math.max(100,Math.round(Number(n||0)/100)*100)}
+function normalizeRush(words,rush){return words<=1000&&rush==="超急件"?"急件":rush}
+function radio(name){return document.querySelector(`input[name="${name}"]:checked`).value}
+function baseDays(words,rush){
+  if(words>5000)return null;
+  if(words<=1000)return rush==="普通件"?2:rush==="急件"?0:null;
+  if(words<=1500)return rush==="普通件"?3:rush==="急件"?2:0;
+  if(words<=3000)return rush==="普通件"?5:rush==="急件"?3:2;
+  if(words<=5000)return rush==="普通件"?7:rush==="急件"?5:3;
+  return null;
+}
+function dayText(d){if(d===null)return"需人工確認";if(d===0)return"當日交稿";return`從當日起算第 ${d} 天`}
+function deadlineText(base,min=0,max=0){if(base===null)return"需人工確認";const a=base+min,b=base+max;if(a===b)return dayText(a);if(a===0)return`當日～從當日起算第 ${b} 天`;return`從當日起算第 ${a}～${b} 天`}
+function linesHtml(lines){return`<div class="breakdown">${lines.map(([a,b])=>`<div class="line"><span>${a}</span><span>${b}</span></div>`).join("")}</div>`}
+function pillsHtml(pills){return pills.length?`<div class="pills">${pills.map(p=>`<span class="pill ${p.cls||""}">${p.text}</span>`).join("")}</div>`:""}
+function noticesHtml(ns,bad=false){return ns.map(n=>`<div class="notice ${bad?"bad":""}">${n}</div>`).join("")}
+function priceRange(a,b){return a===b?money(a):`${money(a)}～${money(b)}`}
+
+function switchPanel(p){
+  $("writingPanel").classList.toggle("hidden",p!=="writing");$("reviewPanel").classList.toggle("hidden",p!=="review");
+  $("writingTab").classList.toggle("active",p==="writing");$("reviewTab").classList.toggle("active",p==="review");
+}
+function updateWritingFields(){
+  const t=$("writingType").value;
+  $("generalFields").classList.toggle("hidden",t!=="general");
+  $("surpriseFields").classList.toggle("hidden",t!=="surprise");
+}
+function calculateWriting(){
+  updateWritingFields();
+  const type=$("writingType").value,minor=radio("writingMinor")==="yes";
+  let title="",price="",lines=[],pills=[],notes=[],blocked=false;
+
+  if(type==="general"){
+    const rating=$("rating").value,input=Number($("generalWords").value||0),words=roundWords(input),selectedRush=$("generalRush").value,rush=normalizeRush(words,selectedRush);
+    const base=words/100*generalRates[rating],rushFee=base*rushRates[rush];
+    let min=base+rushFee,max=min,extraMin=0,extraMax=0;
+    const w=$("worldbuilding").checked,c=$("complexPlot").checked;
+    if(minor&&(rating==="R-18"||rating==="R-18G")){blocked=true;notes.push("此類委託不接：未成年相關一律不接 R/G 向成人內容。")}
+    if(w){min+=base*.1;max+=base*.5;pills.push({text:"世界觀理解需確認"})}
+    if(c){min+=base*.1;max+=base*.4;pills.push({text:"高複雜度劇情需確認"})}
+    if(w&&c){extraMin=1;extraMax=5}else if(w||c){extraMin=1;extraMax=3}
+    const bd=baseDays(words,rush),deadline=deadlineText(bd,extraMin,extraMax);
+    if(selectedRush==="超急件"&&words<=1000){pills.push({text:"1000 字以下請用急件"});notes.push("1000 字以下急件已可 18:00 以前委託、當日交稿，因此超急件會按急件計算。")}
+    if(words>5000){pills.push({text:"5000 字以上需確認"});notes.push("此委託超過 5000 字，交期與最終報價需人工確認。")}
+    if(min<100&&!blocked){pills.push({text:"未滿 100 元",cls:"bad"});notes.push("目前估價未滿 100 元，需加總滿 100 元以上才可委託。")}else if(!blocked){pills.push({text:"已達 100 元門檻",cls:"good"})}
+    title="一般委託";price=blocked?"不接此類委託":priceRange(min,max);
+    lines=[["分級",rating],["輸入字數",`${input} 字`],["計價字數",`${words} 字`],["原價",money(base)],["件別",rush]];
+    if(rushFee)lines.push([`${rush}加價`,money(rushFee)]);
+    if(w)lines.push(["世界觀理解",`${money(base*.1)}～${money(base*.5)}｜需人工確認`]);
+    if(c)lines.push(["高複雜度劇情",`${money(base*.1)}～${money(base*.4)}｜需人工確認`]);
+    lines.push(["基礎時長",dayText(bd)]); if(extraMax)lines.push(["額外時間",`+${extraMin}～${extraMax} 天`]); lines.push(["預估時長",deadline]);
+    writingCopy=`【文稿類估價結果】
+類型：一般委託
+分級：${rating}
+輸入字數：${input} 字
+計價字數：${words} 字
+件別：${rush}
+原價：${money(base)}
+${rushFee?`${rush}加價：${money(rushFee)}
+`:""}${w?`世界觀理解：${money(base*.1)}～${money(base*.5)}，需人工確認
+`:""}${c?`高複雜度劇情：${money(base*.1)}～${money(base*.4)}，需人工確認
+`:""}預估價格：${price}
+預估時長：${deadline}
+
+備註：此為初步估價，實際價格與時長需確認。`;
+  } else {
+    const words=Number($("surpriseWords").value),selectedRush=$("surpriseRush").value,rush=normalizeRush(words,selectedRush),adult=$("surpriseAdult").value;
+    const base=surprisePrices[words],rushFee=base*rushRates[rush],adultFee=base*adultRates[adult],total=base+rushFee+adultFee,bd=baseDays(words,rush),deadline=deadlineText(bd);
+    if(minor&&adult!=="非成人向"){blocked=true;notes.push("此類委託不接：未成年相關一律不接 R/G 向成人內容。")}
+    if(selectedRush==="超急件"&&words<=1000){pills.push({text:"1000 字以下請用急件"});notes.push("1000 字以下急件已可 18:00 以前委託、當日交稿，因此超急件會按急件計算。")}
+    title="驚喜包";price=blocked?"不接此類委託":money(total);
+    lines=[["字數",`${words} 字`],["原價",money(base)],["件別",rush]];
+    if(rushFee)lines.push([`${rush}加價`,money(rushFee)]);
+    lines.push(["成人向設定",adult]);
+    if(adultFee)lines.push(["成人向加價",money(adultFee)]);
+    lines.push(["預估時長",deadline]);
+    if(!blocked)pills.push({text:"已達 100 元門檻",cls:"good"});
+    writingCopy=`【文稿類估價結果】
+類型：驚喜包
+字數：${words} 字
+件別：${rush}
+原價：${money(base)}
+${rushFee?`${rush}加價：${money(rushFee)}
+`:""}成人向設定：${adult}
+${adultFee?`成人向加價：${money(adultFee)}
+`:""}預估價格：${price}
+預估時長：${deadline}
+
+備註：此為初步估價，實際價格與時長需確認。`;
+  }
+  $("copyWriting").disabled=blocked;
+  $("writingResult").innerHTML=`<div class="priceBox"><div class="priceLabel">${title}｜預估價格</div><div class="price">${price}</div></div>${pillsHtml(pills)}${linesHtml(lines)}${noticesHtml(notes,blocked)}`;
+}
+
+function updateReviewFields(){
+  const t=$("reviewType").value;
+  $("normalReviewFields").classList.toggle("hidden",t!=="normal");
+  $("specialReviewFields").classList.toggle("hidden",t!=="special");
+}
+function reviewBase(words){
+  if(fixedReviewPrices[words])return{price:fixedReviewPrices[words],note:"固定價目"};
+  if(words<=1000)return{price:floorTen(words*.34),note:"字數 × 0.34，基礎價抹零"};
+  return{price:floorTen(words*.32),note:"字數 × 0.32，基礎價抹零"};
+}
+function makeReviewItem(){
+  const type=$("reviewType").value,qty=Math.max(1,Number($("reviewQty").value||1)),minor=radio("reviewMinor")==="yes";
+  if(type==="special"){
+    return{title:`特殊鑑定｜${$("specialTopic").value}`,unitWords:1200,words:1200*qty,qty,total:400*qty,totalText:`${money(400*qty)} 起`,manual:true,blocked:false,details:["特殊鑑定目前默認 1200 字，400 元起跳，需人工確認。"]};
+  }
+  const words=Number($("reviewWords").value),topic=$("reviewTopic").value,adult=$("reviewAdult").value,base=reviewBase(words);
+  let rgFee=0,rgText="";
+  if(adult!=="非 R/G 向"){
+    if(words<=500){rgFee=fixedReviewRgFees[words];rgText=`R/G 向固定加價：${money(rgFee)} / 件`}
+    else{rgFee=base.price*(adultRates[adult]||.2);rgText=`R/G 向比例加價：${money(rgFee)} / 件`}
+  }
+  const total=(base.price+rgFee)*qty;
+  return{title:`一般鑑定${adult!=="非 R/G 向"?"＋R/G 向內容":""}｜${topic}`,unitWords:words,words:words*qty,qty,total,totalText:money(total),manual:false,blocked:minor&&adult!=="非 R/G 向",details:[base.note,`單件原價：${money(base.price)}`,...(adult!=="非 R/G 向"?[rgText,`R/G 向設定：${adult}`]:[])]};
+}
+function addReview(){reviews.push(makeReviewItem());renderReviews()}
+function removeReview(i){reviews.splice(i,1);renderReviews()}
+window.removeReview=removeReview;
+
+function renderReviews(){
+  const selectedRush=$("reviewRush").value,totalWords=reviews.reduce((s,i)=>s+i.words,0),known=reviews.reduce((s,i)=>s+i.total,0),rush=normalizeRush(roundWords(totalWords||0),selectedRush),rushFee=known*rushRates[rush],final=known+rushFee;
+  const manual=reviews.some(i=>i.manual),blocked=reviews.some(i=>i.blocked),bd=baseDays(roundWords(totalWords||0),rush),deadline=reviews.length?deadlineText(bd):"請先加入鑑定項目";
+  let price=blocked?"不接此類委託":reviews.length?`${money(final)}${manual?" 起":""}`:"NT$ 0";
+  let pills=[],notes=[];
+  if(!reviews.length)notes.push("尚未加入鑑定項目。");
+  if(blocked)notes.push("此類委託不接：未成年相關一律不接 R/G 向成人內容。");
+  if(selectedRush==="超急件"&&roundWords(totalWords||0)<=1000&&reviews.length){pills.push({text:"1000 字以下請用急件"});notes.push("1000 字以下急件已可 18:00 以前委託、當日交稿，因此超急件會按急件計算。")}
+  if(manual&&!blocked)pills.push({text:"含人工確認項目"});
+  if(known>0&&known<100&&!blocked){pills.push({text:"未滿 100 元",cls:"bad"});notes.push("目前估價未滿 100 元，需加總滿 100 元以上才可委託。")}
+  if(known>=100&&!blocked)pills.push({text:"已達 100 元門檻",cls:"good"});
+  if(rush!=="普通件")pills.push({text:`${rush}加價`});
+  const lines=[["項目數",`${reviews.length} 項`],["總字數",`${totalWords} 字`],["件別",rush],["已知金額",money(known)]];
+  if(rushFee)lines.push([`${rush}加價`,money(rushFee)]);
+  lines.push(["預估價格",price],["預估時長",deadline]);
+  $("reviewResult").innerHTML=`<div class="priceBox"><div class="priceLabel">鑑定類｜預估價格</div><div class="price">${price}</div></div>${pillsHtml(pills)}${linesHtml(lines)}${noticesHtml(notes,blocked)}`;
+  $("reviewList").innerHTML=reviews.map((i,idx)=>`<div class="reviewItem"><div class="reviewTop"><div><div class="reviewTitle">${idx+1}. ${i.title}</div><div class="hint">${i.unitWords} 字 × ${i.qty}｜合計 ${i.words} 字</div></div><button class="smallBtn" type="button" onclick="removeReview(${idx})">移除</button></div><div class="hint">${i.details.join("｜")}</div><strong>${i.totalText}${i.blocked?"｜不接":""}</strong></div>`).join("");
+  reviewCopy=`【鑑定類估價結果】
+${reviews.length?reviews.map((i,idx)=>`${idx+1}. ${i.title}｜${i.unitWords} 字 × ${i.qty}｜${i.totalText}${i.manual?"｜需人工確認":""}${i.blocked?"｜不接":""}`).join("\n"):"尚未加入鑑定項目"}
+
+總字數：${totalWords} 字
+件別：${rush}
+已知金額：${money(known)}
+${rushFee?`${rush}加價：${money(rushFee)}
+`:""}預估價格：${price}
+預估時長：${deadline}
+
+備註：此為初步估價，實際價格與時長需確認。`;
+  $("copyReview").disabled=!reviews.length||blocked;
+}
+async function copyText(text,id){try{await navigator.clipboard.writeText(text);$(id).textContent="已複製。"}catch(e){$(id).textContent="複製失敗，請手動選取文字。"}setTimeout(()=>$(id).textContent="",2400)}
+
+$("writingTab").onclick=()=>switchPanel("writing");$("reviewTab").onclick=()=>switchPanel("review");
+document.querySelectorAll("input,select").forEach(el=>{el.addEventListener("input",()=>{calculateWriting();updateReviewFields();renderReviews()});el.addEventListener("change",()=>{calculateWriting();updateReviewFields();renderReviews()})});
+$("addReview").onclick=addReview;$("clearReviews").onclick=()=>{reviews=[];renderReviews()};$("copyWriting").onclick=()=>copyText(writingCopy,"writingStatus");$("copyReview").onclick=()=>copyText(reviewCopy,"reviewStatus");
+switchPanel("writing");updateReviewFields();calculateWriting();renderReviews();
+</script>
+</body>
+</html>
